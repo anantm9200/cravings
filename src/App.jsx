@@ -201,7 +201,7 @@ export default function App() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: EXACT_CSS }} />
-      {view === 'form' && <ExactOrderForm key={formKey} onSuccess={(data) => { setCompletedOrder(data); setView('success'); }} onAdmin={() => setView('admin')} />}
+      {view === 'form' && <ExactOrderForm key={formKey} onSuccess={(data) => { setCompletedOrder(data.order ? data.order : data); setView('success'); }} onAdmin={() => setView('admin')} />}
       {view === 'success' && <SuccessScreen order={completedOrder} onNewOrder={() => { setFormKey(prev => prev + 1); setView('form'); }} />}
       {view === 'admin' && <AdminPortal onBack={() => { setFormKey(prev => prev + 1); setView('form'); }} />}
     </>
@@ -344,6 +344,18 @@ function ExactOrderForm({ onSuccess, onAdmin }) {
             <h2 style="margin-top: 0; color: #111;">Catering Order Confirmation</h2>
             <p>Hi <strong>${cust.name}</strong>,</p>
             <p>Thank you for placing your catering order. Here are your details:</p>
+            
+            <div style="background-color: #f8faff; border: 1px solid #cce0ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #0055aa;">Customer Details</h3>
+              <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                ${cust.company ? `<tr><td style="padding: 3px 0; width: 35%;"><strong>Company:</strong></td><td>${cust.company}</td></tr>` : ''}
+                <tr><td style="padding: 3px 0; width: 35%;"><strong>Name:</strong></td><td>${cust.name}</td></tr>
+                <tr><td style="padding: 3px 0;"><strong>Phone:</strong></td><td>${cust.phone || 'N/A'}</td></tr>
+                <tr><td style="padding: 3px 0;"><strong>Email:</strong></td><td>${cust.email}</td></tr>
+                ${cust.address ? `<tr><td style="padding: 3px 0; vertical-align: top;"><strong>Address:</strong></td><td>${cust.address}<br/>${cust.suburb}</td></tr>` : ''}
+              </table>
+            </div>
+
             <table style="width: 100%; margin: 20px 0; font-size: 14px; border-collapse: collapse;">
               <tr><td style="padding: 5px 0;"><strong>Order Number:</strong></td><td style="text-align: right;">${orderFormId}</td></tr>
               <tr><td style="padding: 5px 0;"><strong>Date Required:</strong></td><td style="text-align: right;">${cust.date}</td></tr>
@@ -364,6 +376,7 @@ function ExactOrderForm({ onSuccess, onAdmin }) {
             </h3>
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eaeaea; font-size: 13px; color: #666;">
               <p><strong>Special Instructions:</strong><br/> ${meta.dietary || 'None'}</p>
+              <p><strong>Invoice Required:</strong> ${meta.invoice === 'yes' ? 'Yes' : 'No'}</p>
               <p><strong>Bank Transfer Details:</strong><br/> Commonwealth Bank | BSB: 066-202 | Acct: 1056 0943</p>
             </div>
           </div>
@@ -375,7 +388,7 @@ function ExactOrderForm({ onSuccess, onAdmin }) {
         try {
           const payload = {
             from: 'Cravings Cafe <noreply@emails.liaisonit.com>',
-            to: [cust.email, 'complete.anant@gmail.com', 'cravingseastperth@gmail.com'],
+            to: [cust.email, 'complete.anant@gmail.com'],
             subject: `Catering Order Confirmation - ${finalOrderInfo.order_form_id}`,
             html: emailHtml
           };
@@ -612,6 +625,12 @@ function SuccessScreen({ order, onNewOrder }) {
       
       <h1 style={{ color: '#111', margin: '0 0 10px 0', fontSize: '32px' }}>Order Confirmed</h1>
       <p style={{ color: '#555', fontSize: '16px', margin: '0 0 30px 0' }}>Thank you! Your catering request has been successfully processed and securely saved.</p>
+      
+      <div style={{ background: '#f8faff', border: '1px solid #cce0ff', padding: '25px', borderRadius: '8px', margin: '0 0 30px 0' }}>
+        <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>Order Reference ID</p>
+        <p style={{ margin: '0', fontSize: '28px', fontWeight: 'bold', color: '#0055aa' }}>{order.order_form_id || order.order_number}</p>
+      </div>
+
       <p style={{ color: '#777', fontSize: '14px', marginBottom: '30px' }}>A confirmation email has been dispatched to your inbox and the Cravings Cafe team.</p>
 
       <button onClick={onNewOrder} style={{ padding: '15px 30px', background: '#111', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', borderRadius: '6px', letterSpacing: '1px', width: '100%' }}>START NEW ORDER</button>
