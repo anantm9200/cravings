@@ -388,7 +388,7 @@ function ExactOrderForm({ onSuccess, onAdmin }) {
         try {
           const payload = {
             from: 'Cravings Cafe <noreply@emails.liaisonit.com>',
-            to: [cust.email, 'complete.anant@gmail.com'],
+            to: [cust.email, 'cravingseastperth@gmail.com'],
             subject: `Catering Order Confirmation - ${finalOrderInfo.order_form_id}`,
             html: emailHtml
           };
